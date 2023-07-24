@@ -1,0 +1,417 @@
+{
+	"info": {
+		"_postman_id": "9052842b-a401-4661-9f11-c2478093d337",
+		"name": "Second Challenge for NordPass",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5517306",
+		"_collection_link": "https://red-sunset-632328.postman.co/workspace/My-Workspace~fe578c64-f715-4c45-883b-f331d34913d4/collection/5517306-9052842b-a401-4661-9f11-c2478093d337?action=share&creator=5517306&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "Generates session token (JWT) Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.collectionVariables.set(\"accessToken\", response.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"john@doe.com\",\n  \"password\": \"veryStrongPassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/user/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "First and second cases",
+			"item": [
+				{
+					"name": "Return all user items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"The list of items contains more than 1 element\", () => {",
+									"    pm.expect(response[0].items).length.to.be.above(1);",
+									"});",
+									"",
+									"const secondItem = response[0].items[1]",
+									"",
+									"if (secondItem) {",
+									"    pm.collectionVariables.set(\"secondItemId\", secondItem);",
+									"}",
+									"else {",
+									"    pm.expect.fail(\"The second item was not found\");",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/user/items?limit=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"items"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Returns specific user item by its item id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"const schema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": {",
+									"        \"type\": \"object\",",
+									"        \"required\": [",
+									"            \"id\",",
+									"            \"title\",",
+									"            \"tags\",",
+									"            \"files\",",
+									"            \"fields\",",
+									"            \"shares\",",
+									"            \"created_at\",",
+									"            \"updated_at\"",
+									"        ],",
+									"        \"properties\": {",
+									"            \"id\": {",
+									"                \"type\": \"string\"",
+									"            },",
+									"            \"title\": {",
+									"                \"type\": \"string\"",
+									"            },",
+									"            \"tags\": {",
+									"                \"type\": \"array\",",
+									"                \"items\": {",
+									"                    \"type\": \"string\"",
+									"                }",
+									"            },",
+									"            \"files\": {",
+									"                \"type\": \"array\",",
+									"                \"items\": {",
+									"                    \"type\": \"object\",",
+									"                    \"required\": [",
+									"                        \"id\",",
+									"                        \"name\",",
+									"                        \"size\",",
+									"                        \"content_path\"",
+									"                    ],",
+									"                    \"properties\": {",
+									"                        \"id\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"name\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"size\": {",
+									"                            \"type\": \"integer\"",
+									"                        },",
+									"                        \"content_path\": {",
+									"                            \"type\": \"string\"",
+									"                        }",
+									"                    }",
+									"                }",
+									"            },",
+									"            \"fields\": {",
+									"                \"type\": \"array\",",
+									"                \"items\": {",
+									"                    \"type\": \"object\",",
+									"                    \"required\": [",
+									"                        \"id\",",
+									"                        \"label\",",
+									"                        \"type\",",
+									"                        \"value\"",
+									"                    ],",
+									"                    \"properties\": {",
+									"                        \"id\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"label\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"type\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"value\": {",
+									"                            \"type\": \"string\"",
+									"                        }",
+									"                    }",
+									"                }",
+									"            },",
+									"            \"shares\": {",
+									"                \"type\": \"array\",",
+									"                \"items\": {",
+									"                    \"type\": \"object\",",
+									"                    \"required\": [",
+									"                        \"user_uuid\",",
+									"                        \"email\",",
+									"                        \"status\",",
+									"                        \"updated_at\"",
+									"                    ],",
+									"                    \"properties\": {",
+									"                        \"user_uuid\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"email\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"status\": {",
+									"                            \"type\": \"string\"",
+									"                        },",
+									"                        \"updated_at\": {",
+									"                            \"type\": \"string\"",
+									"                        }",
+									"                    }",
+									"                }",
+									"            },",
+									"            \"created_at\": {",
+									"                \"type\": \"string\"",
+									"            },",
+									"            \"updated_at\": {",
+									"                \"type\": \"string\"",
+									"            }",
+									"        }",
+									"    }",
+									"}",
+									"",
+									"pm.test(\"Validate schema\", () => {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/user/:itemId/item",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								":itemId",
+								"item"
+							],
+							"variable": [
+								{
+									"key": "itemId",
+									"value": "{{secondItemId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Third case",
+			"item": [
+				{
+					"name": "Creates specific item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", () => {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"{{$randomInt}}\",\n  \"title\": \"{{$randomPhrase}}\",\n  \"tags\": [\n    \"{{$randomWord}}\"\n  ],\n  \"files\": [\n    {\n      \"id\": \"{{$randomInt}}\",\n      \"name\": \"{{$randomWord}}\",\n      \"size\": \"{{$randomInt}}\",\n      \"content_path\": \"{{$randomFilePath}}\"\n    }\n  ],\n  \"fields\": [\n    {\n      \"id\": \"{{$randomInt}}\",\n      \"label\": \"{{$randomWord}}\",\n      \"type\": \"{{$randomWord}}\",\n      \"value\": \"{{$randomWord}}\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/item",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"item"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://virtserver.swaggerhub.com/nord-s/User-API/1.0.0"
+		},
+		{
+			"key": "accessToken",
+			"value": "---",
+			"type": "string"
+		},
+		{
+			"key": "secondItemId",
+			"value": ""
+		}
+	]
+}
